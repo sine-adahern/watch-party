@@ -1,3 +1,4 @@
+
 # Watch Party — Rust scaffold (Phase 1)
 
 A synchronized home-video watch party. Upload MP4s you own, watch them together
