@@ -1,0 +1,10 @@
+[workspace]
+resolver = "2"
+members = ["shared", "server", "web"]
+# `cargo build` at the root builds only the native crates.
+# The `web` crate is a WASM app — build it with `trunk` (see README).
+default-members = ["shared", "server"]
+
+[workspace.package]
+edition = "2021"
+version = "0.1.0"
