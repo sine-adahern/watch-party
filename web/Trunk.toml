@@ -1,0 +1,19 @@
+[build]
+target = "index.html"
+
+[serve]
+address = "127.0.0.1"
+port = 8080
+open = false
+
+# During `trunk serve`, forward API + media + websocket to the Axum server on
+# :3000 so the browser sees a single origin (no CORS needed).
+[[proxy]]
+backend = "http://127.0.0.1:3000/api"
+
+[[proxy]]
+backend = "http://127.0.0.1:3000/media"
+
+[[proxy]]
+backend = "http://127.0.0.1:3000/ws"
+ws = true
