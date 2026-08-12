@@ -3,6 +3,7 @@
 //! sync layer (Phase 2) plugs into `crate::api` + the shared protocol.
 
 mod api;
+mod call;
 mod app;
 
 fn main() {
