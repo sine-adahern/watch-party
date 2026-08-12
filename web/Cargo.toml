@@ -8,13 +8,16 @@ shared = { path = "../shared" }
 leptos = { version = "0.6", features = ["csr"] }
 gloo-net = "0.6"
 wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
 web-sys = { version = "0.3", features = [
-    "Event",
-    "EventTarget",
-    "File",
-    "FileList",
-    "Blob",
-    "HtmlInputElement",
+    "Event", "EventTarget", "File", "FileList", "Blob",
+    "HtmlInputElement", "HtmlMediaElement", "HtmlVideoElement", "HtmlDivElement",
+    "WebSocket", "MessageEvent", "Window", "Location", "Document", "Element", "Node",
+    "Navigator", "MediaDevices", "MediaStream", "MediaStreamTrack", "MediaStreamConstraints",
+    "RtcPeerConnection", "RtcConfiguration", "RtcSessionDescriptionInit",
+    "RtcIceCandidate", "RtcIceCandidateInit", "RtcPeerConnectionIceEvent",
+    "RtcTrackEvent", "RtcRtpSender",
 ] }
 console_error_panic_hook = "0.1"
 serde = { version = "1", features = ["derive"] }
