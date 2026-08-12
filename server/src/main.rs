@@ -23,7 +23,6 @@ use crate::rooms::RoomRegistry;
 pub struct AppState {
     pub media_dir: PathBuf,
     pub videos: Arc<RwLock<Vec<shared::Video>>>,
-    #[allow(dead_code)] // used from Phase 2 onward
     pub rooms: Arc<RoomRegistry>,
 }
 
@@ -49,6 +48,18 @@ async fn main() {
         videos: Arc::new(RwLock::new(videos)),
         rooms: Arc::new(RoomRegistry::new()),
     };
+
+    // Phase 2: nudge playing rooms back into sync every few seconds.
+    {
+        let state = state.clone();
+        tokio::spawn(async move {
+            let mut tick = tokio::time::interval(std::time::Duration::from_secs(3));
+            loop {
+                tick.tick().await;
+                state.rooms.heartbeat();
+            }
+        });
+    }
 
     let app = Router::new()
         .route("/api/videos", get(media::list_videos))
