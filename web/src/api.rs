@@ -34,3 +34,4 @@ pub async fn upload(file: File) -> Result<Video, String> {
     }
     resp.json::<Video>().await.map_err(|e| e.to_string())
 }
+
