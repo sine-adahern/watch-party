@@ -55,7 +55,9 @@ pub enum ClientMsg {
     Signal {
         to: PeerId,
         kind: SignalKind,
-        sdp: String,
+        /// Opaque payload: an SDP string for Offer/Answer, or a JSON ICE
+        /// candidate for IceCandidate.
+        payload: String,
     },
 }
 
@@ -80,6 +82,6 @@ pub enum ServerMsg {
     Signal {
         from: PeerId,
         kind: SignalKind,
-        sdp: String,
+        payload: String,
     },
 }
