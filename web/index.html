@@ -16,6 +16,12 @@
       .player { width: 100%; border-radius: 12px; background: #000; margin: 12px 0; }
       .status { min-height: 1.2em; color: #888; }
       .empty { color: #888; }
+      .join { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+      .inp { font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid #8886; background: transparent; }
+      .join button { font: inherit; padding: 8px 16px; border-radius: 8px; border: 1px solid #8886; cursor: pointer; }
+      .room-bar { color: #4a8; font-weight: 500; margin: 12px 0; }
+      .peers { list-style: none; padding: 0; }
+      .peers li { padding: 4px 0; color: #666; }
       .library { list-style: none; padding: 0; }
       .library li { margin: 6px 0; }
       .library button {
@@ -24,6 +30,10 @@
         width: 100%; text-align: left;
       }
       .library button:hover { border-color: #888; }
+      .call { display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; margin: 12px 0; }
+      .remotes { display: flex; gap: 8px; flex-wrap: wrap; }
+      .me, .remote { width: 180px; height: 135px; object-fit: cover; border-radius: 10px; background: #111; }
+      .me { outline: 2px solid #4a8; }
     </style>
   </head>
   <body></body>
