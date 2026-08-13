@@ -323,17 +323,22 @@ pub fn App() -> impl IntoView {
                 when=move || current.get().is_some()
                 fallback=|| view! { <p class="empty">"Pick a video from the library to start."</p> }
             >
-                {move || current.get().map(|v| view! {
-                    <video
-                        node_ref=video_ref
-                        class="player"
-                        controls=true
-                        src=format!("/media/{}.mp4", v.id)
-                        on:play=on_play
-                        on:pause=on_pause
-                        on:seeked=on_seeked
-                    ></video>
-                })}
+               {move || {
+    let on_play = on_play.clone();
+    let on_pause = on_pause.clone();
+    let on_seeked = on_seeked.clone();
+    current.get().map(move |v| view! {
+        <video
+            node_ref=video_ref
+            class="player"
+            controls=true
+            src=format!("/media/{}.mp4", v.id)
+            on:play=on_play
+            on:pause=on_pause
+            on:seeked=on_seeked
+        ></video>
+    })
+}}
             </Show>
 
             <label class="upload">"Upload MP4: "
