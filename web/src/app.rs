@@ -308,7 +308,10 @@ pub fn App() -> impl IntoView {
                     <input class="inp" placeholder="your name"
                         prop:value=move || name_input.get()
                         on:input=move |e| name_input.set(event_target_value(&e))/>
-                    <button on:click=do_join>"Join"</button>
+                     <button on:click={
+                        let do_join = do_join.clone();
+                        move |ev| do_join(ev)
+                    }>"Join"</button>
                 </div>
             </Show>
 
