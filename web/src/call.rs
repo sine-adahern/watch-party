@@ -108,7 +108,7 @@ impl Call {
             let tracks = stream.get_tracks();
             for i in 0..tracks.length() {
                 let track: MediaStreamTrack = tracks.get(i).unchecked_into();
-                let _ = pc.add_track(&track, stream);
+                let _ = pc.add_track(&track, stream, &Array::new());
             }
         }
 
