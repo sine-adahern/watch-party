@@ -33,7 +33,7 @@ const STUN: &str = "stun:stun.l.google.com:19302";
 pub struct Call(Rc<Inner>);
 
 struct Inner {
-    ws: web_sys::WebSocket,
+    ws: Rc<RefCell<Option<web_sys::WebSocket>>>,
     local: RefCell<Option<MediaStream>>,
     peers: RefCell<HashMap<String, RtcPeerConnection>>,
     remote_container: Element,
@@ -47,14 +47,18 @@ impl Inner {
             kind,
             payload,
         };
-        if let Ok(json) = serde_json::to_string(&msg) {
-            let _ = self.ws.send_with_str(&json);
+        if let (Some(ws), Ok(json)) = (self.ws.borrow().as_ref(), serde_json::to_string(&msg)) {
+            let _ = ws.send_with_str(&json);
         }
     }
 }
 
 impl Call {
-    pub fn new(ws: web_sys::WebSocket, remote_container: Element, local_video: HtmlVideoElement) -> Self {
+    pub fn new(
+        ws: Rc<RefCell<Option<web_sys::WebSocket>>>,
+        remote_container: Element,
+        local_video: HtmlVideoElement,
+    ) -> Self {
         Call(Rc::new(Inner {
             ws,
             local: RefCell::new(None),
@@ -230,6 +234,17 @@ impl Call {
             pc.close();
         }
         self.remove_remote(pid);
+    }
+
+    /// Tear everything down (used before a reconnect re-establishes the mesh).
+    pub fn reset(&self) {
+        for (_, pc) in self.0.peers.borrow_mut().drain() {
+            pc.close();
+        }
+        let node = &self.0.remote_container;
+        while let Some(child) = node.last_element_child() {
+            let _ = node.remove_child(&child);
+        }
     }
 }
 
