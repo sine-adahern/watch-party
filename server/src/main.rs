@@ -1,28 +1,32 @@
-//! Phase 1 backend: upload home videos, serve them (with seek support),
-//! and list them. A `/ws` echo endpoint and a `rooms` registry are stubbed
-//! in so Phase 2 (playback sync) drops in without restructuring.
+//! Watch-party backend.
+//! Phase 1: upload + range-served video. Phase 2: room sync over `/ws`.
+//! Phase 3: WebRTC signaling relay. Phase 4: SQLite library + delete + faststart.
 
+mod db;
 mod media;
 mod rooms;
 mod ws;
 
-use std::{net::SocketAddr, path::PathBuf, sync::Arc};
+use std::{
+    net::SocketAddr,
+    path::PathBuf,
+    sync::{Arc, Mutex},
+};
 
 use axum::{
     extract::DefaultBodyLimit,
-    routing::{get, post},
+    routing::{delete, get, post},
     Router,
 };
-use tokio::sync::RwLock;
+use rusqlite::Connection;
 use tower_http::{services::ServeDir, trace::TraceLayer};
 
 use crate::rooms::RoomRegistry;
 
-/// Shared application state. Cheap to clone (everything is behind an `Arc`).
 #[derive(Clone)]
 pub struct AppState {
     pub media_dir: PathBuf,
-    pub videos: Arc<RwLock<Vec<shared::Video>>>,
+    pub db: Arc<Mutex<Connection>>,
     pub rooms: Arc<RoomRegistry>,
 }
 
@@ -40,16 +44,16 @@ async fn main() {
         .await
         .expect("create media dir");
 
-    let videos = media::load_index(&media_dir).await;
-    tracing::info!("loaded {} video(s) from {}", videos.len(), media_dir.display());
+    let db = Arc::new(db::open(&media_dir.join("library.db")));
+    tracing::info!("library: {} video(s)", db::list(&db.lock().unwrap()).len());
 
     let state = AppState {
         media_dir: media_dir.clone(),
-        videos: Arc::new(RwLock::new(videos)),
+        db,
         rooms: Arc::new(RoomRegistry::new()),
     };
 
-    // Phase 2: nudge playing rooms back into sync every few seconds.
+    // Nudge playing rooms back into sync every few seconds.
     {
         let state = state.clone();
         tokio::spawn(async move {
@@ -65,17 +69,13 @@ async fn main() {
         .route("/api/videos", get(media::list_videos))
         .route(
             "/api/upload",
-            // Uploads stream to disk; disable the small default body cap and
-            // enforce our own limit inside the handler.
             post(media::upload).layer(DefaultBodyLimit::disable()),
         )
+        .route("/api/videos/:id", delete(media::delete_video))
         .route("/ws", get(ws::handler))
-        // Uploaded videos. `ServeDir` answers HTTP range requests, so the
-        // browser's <video> element can seek for free.
+        // Uploaded videos, with HTTP range (seek) support for free.
         .nest_service("/media", ServeDir::new(&media_dir))
-        // The built frontend (after `trunk build`). In dev, `trunk serve`
-        // hosts the UI and proxies /api + /media + /ws here, so this fallback
-        // is only used in production.
+        // Built frontend in production; in dev, trunk serves + proxies here.
         .fallback_service(ServeDir::new("web/dist"))
         .layer(TraceLayer::new_for_http())
         .with_state(state);
