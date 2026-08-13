@@ -35,3 +35,15 @@ pub async fn upload(file: File) -> Result<Video, String> {
     resp.json::<Video>().await.map_err(|e| e.to_string())
 }
 
+/// `DELETE /api/videos/{id}`
+pub async fn delete_video(id: &str) -> Result<(), String> {
+    let resp = Request::delete(&format!("/api/videos/{id}"))
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+    if resp.ok() {
+        Ok(())
+    } else {
+        Err(format!("delete failed: {}", resp.status()))
+    }
+}
