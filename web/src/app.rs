@@ -352,14 +352,22 @@ pub fn App() -> impl IntoView {
             <ul class="library">
                 <For each=move || videos.get() key=|v| v.id.clone() let:v>
                     <li>
-                        <button class="pick" on:click={
+                        <button class="pick" title=v.name.clone() on:click={
                             let sock = library_sock.clone();
                             let v = v.clone();
                             move |_| {
                                 current.set(Some(v.clone()));
                                 send_via(&sock, &ClientMsg::LoadVideo { video_id: v.id.clone() });
                             }
-                        }>{v.name.clone()}</button>
+                        }>
+                            <video
+                                class="thumb"
+                                src=format!("/media/{}.mp4#t=0.5", v.id)
+                                preload="metadata"
+                                muted=true
+                                playsinline=true
+                            ></video>
+                        </button>
                         <button class="del" title="Delete" on:click={
                             let vid = v.id.clone();
                             move |_| {
