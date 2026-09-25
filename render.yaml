@@ -1,0 +1,33 @@
+# render.yaml — deploy Watch Party on Render with no local tooling.
+#
+# Render reads this file, builds the existing Dockerfile in its own cloud
+# (Rust/trunk live inside the build container, not on your machine), and serves
+# the app on a public HTTPS URL. You install nothing; guests just open the link.
+#
+# See DEPLOY.md for the click-by-click steps.
+
+services:
+  - type: web
+    name: watch-party
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    region: frankfurt        # closest Render region to Ireland (others: oregon, ohio, virginia, singapore)
+    plan: starter            # paid (~$7/mo). Required for the persistent disk below.
+    healthCheckPath: /api/videos
+    autoDeploy: true         # redeploys automatically when you push to the repo
+    envVars:
+      - key: MEDIA_DIR
+        value: /data         # matches the disk mount below, so uploads persist
+    disk:
+      name: media
+      mountPath: /data
+      sizeGB: 10             # storage for uploaded videos; raise if you need more
+
+# ---------------------------------------------------------------------------
+# FREE, no-persistence variant (just to try it out):
+# delete the whole `disk:` block above, remove the MEDIA_DIR env var, and set
+#   plan: free
+# Caveat: on the free plan the service sleeps when idle and ALL uploaded videos
+# are wiped on every restart/redeploy. Fine for a quick test, not for real use.
+# ---------------------------------------------------------------------------
